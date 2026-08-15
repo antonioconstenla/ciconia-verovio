@@ -104,7 +104,11 @@ enum data_DURATION {
     DURATION_minima,
     DURATION_semiminima,
     DURATION_fusa,
-    DURATION_semifusa
+    DURATION_semifusa,
+    // Rest-only tokens matching MEI data.DURATIONRESTS.mensural 2B/3B.
+    // Not note durations: Att::StrToDuration does not parse these strings.
+    DURATION_2B,
+    DURATION_3B
 };
 
 /**

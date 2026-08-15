@@ -7523,6 +7523,10 @@ bool MEIInput::ReadRest(Object *parent, pugi::xml_node rest)
     }
 
     this->ReadAltSymInterface(rest, vrvRest);
+    pugi::xml_attribute durAttr = rest.attribute("dur");
+    if (durAttr && vrvRest->ApplyExplicitMensuralRestDuration(durAttr.value())) {
+        rest.remove_attribute("dur");
+    }
     this->ReadDurationInterface(rest, vrvRest);
     this->ReadOffsetInterface(rest, vrvRest);
     this->ReadPositionInterface(rest, vrvRest);

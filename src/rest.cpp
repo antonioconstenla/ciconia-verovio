@@ -13,6 +13,7 @@
 
 //----------------------------------------------------------------------------
 
+#include "attconverter.h"
 #include "comparison.h"
 #include "doc.h"
 #include "editorial.h"
@@ -20,6 +21,7 @@
 #include "fermata.h"
 #include "findlayerelementsfunctor.h"
 #include "layer.h"
+#include "mensur.h"
 #include "smufl.h"
 #include "staff.h"
 #include "symboldef.h"
@@ -252,6 +254,43 @@ bool Rest::AddChild(Object *child)
     return true;
 }
 
+bool Rest::ApplyExplicitMensuralRestDuration(const std::string &value)
+{
+    // Generated rest-duration type knows 2B/3B; generic note duration does not.
+    AttConverter converter;
+    const data_DURATIONRESTS_mensural restDur = converter.StrToDurationrestsMensural(value, false);
+    if (restDur == DURATIONRESTS_mensural_2B) {
+        this->SetDur(DURATION_2B);
+        return true;
+    }
+    if (restDur == DURATIONRESTS_mensural_3B) {
+        this->SetDur(DURATION_3B);
+        return true;
+    }
+    return false;
+}
+
+int Rest::GetMensuralRestStaffSpaces() const
+{
+    if (!this->IsMensuralDur()) return 0;
+
+    const data_DURATION dur = this->GetDur();
+    if (dur == DURATION_2B) return 2;
+    if (dur == DURATION_3B) return 3;
+    if ((dur == DURATION_brevis) || (dur == DURATION_breve)) return 1;
+    if ((dur == DURATION_longa) || (dur == DURATION_long)) {
+        const Layer *layer = vrv_cast<const Layer *>(this->GetFirstAncestor(LAYER));
+        if (layer) {
+            const Mensur *mensur = layer->GetCurrentMensur();
+            if (mensur && (mensur->GetModusminor() == MODUSMINOR_3)) return 3;
+            if (mensur && (mensur->GetModusminor() == MODUSMINOR_2)) return 2;
+        }
+        // Unset modusminor: keep current Verovio drawing (2-space E9F2), not ternary default.
+        return 2;
+    }
+    return 0;
+}
+
 char32_t Rest::GetRestGlyph() const
 {
     return this->GetRestGlyph(this->GetActualDur());
@@ -293,7 +332,9 @@ char32_t Rest::GetRestGlyph(const data_DURATION duration) const
     if (this->IsMensuralDur()) {
         switch (duration) {
             case DURATION_maxima: return SMUFL_E9F0_mensuralRestMaxima; break;
-            case DURATION_long: return SMUFL_E9F2_mensuralRestLongaImperfecta; break;
+            case DURATION_long:
+            case DURATION_2B: return SMUFL_E9F2_mensuralRestLongaImperfecta; break;
+            case DURATION_3B: return 0; break;
             case DURATION_breve: return SMUFL_E9F3_mensuralRestBrevis; break;
             case DURATION_1: return SMUFL_E9F4_mensuralRestSemibrevis; break;
             case DURATION_2: return SMUFL_E9F5_mensuralRestMinima; break;

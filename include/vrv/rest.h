@@ -98,6 +98,21 @@ public:
     ///@}
 
     /**
+     * Consume MEI rest @dur values that exist only on rests (2B / 3B).
+     * Uses generated data.DURATIONRESTS.mensural; never treated as note durations.
+     * Returns true if the value was consumed so the generic duration parser
+     * must not see it.
+     */
+    bool ApplyExplicitMensuralRestDuration(const std::string &value);
+
+    /**
+     * For mensural rests, return intended staff-space occupancy.
+     * 2B / longa+modusminor=2 or unset => 2; 3B / longa+modusminor=3 => 3; brevis => 1.
+     * Returns 0 when the default SMuFL glyph path should be used.
+     */
+    int GetMensuralRestStaffSpaces() const;
+
+    /**
      * Get the vertical location for the rests that are located on other layers
      */
     int GetOptimalLayerLocation(const Staff *staff, const Layer *layer, int defaultLocation) const;

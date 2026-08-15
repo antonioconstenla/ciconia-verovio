@@ -1607,12 +1607,25 @@ void View::DrawRest(DeviceContext *dc, LayerElement *element, Layer *layer, Staf
         drawingDur = DURATION_4;
     }
 
-    const char32_t drawingGlyph = rest->GetRestGlyph(drawingDur);
-
     int x = element->GetDrawingX();
     int y = element->GetDrawingY();
 
     this->CalcOffset(dc, x, y);
+
+    const int mensuralSpaces = rest->GetMensuralRestStaffSpaces();
+    if ((mensuralSpaces == 3) && !rest->HasGlyphName() && !rest->HasGlyphNum()) {
+        // Geometric 3-space rest in staff-space units. Do not scale E9F1.
+        const int space = m_doc->GetDrawingDoubleUnit(staffSize);
+        const int width = m_doc->GetDrawingStemWidth(staffSize) * 3;
+        const int topY = staff->GetDrawingY();
+        const int bottomY = topY - (staff->m_drawingLines - 1) * space;
+        const int restTop = bottomY + 3 * space;
+        this->DrawFilledRectangle(dc, x, bottomY, x + width, restTop);
+        this->DrawLayerChildren(dc, rest, layer, staff, measure);
+        return;
+    }
+
+    const char32_t drawingGlyph = rest->GetRestGlyph(drawingDur);
 
     char32_t enclosingFront, enclosingBack;
     std::tie(enclosingFront, enclosingBack) = rest->GetEnclosingGlyphs();

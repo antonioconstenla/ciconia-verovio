@@ -161,6 +161,8 @@ Fraction DurationInterface::DurationWithBrevisEquivalence(
             duration = duration * abs(currentMensur->GetModusminor()) * abs(currentMensur->GetModusmaior());
             break;
         case DURATION_long: duration = duration * abs(currentMensur->GetModusminor()); break;
+        case DURATION_2B: duration = duration * 2; break;
+        case DURATION_3B: duration = duration * 3; break;
         case DURATION_breve: break;
         case DURATION_1: duration = duration / abs(currentMensur->GetTempus()); break;
         default:
@@ -179,6 +181,8 @@ Fraction DurationInterface::DurationWithSemibrevisEquivalence(
     int ratio = 0;
     Fraction duration(DURATION_1);
     switch (noteDur) {
+        case DURATION_2B: duration = duration * 2 * abs(currentMensur->GetTempus()); break;
+        case DURATION_3B: duration = duration * 3 * abs(currentMensur->GetTempus()); break;
         case DURATION_maxima: duration = duration * abs(currentMensur->GetModusmaior()); [[fallthrough]];
         case DURATION_long: duration = duration * abs(currentMensur->GetModusminor()); [[fallthrough]];
         case DURATION_breve: duration = duration * abs(currentMensur->GetTempus()); [[fallthrough]];
@@ -199,6 +203,12 @@ Fraction DurationInterface::DurationWithMinimaEquivalence(
     int ratio = 0;
     Fraction duration(DURATION_2);
     switch (noteDur) {
+        case DURATION_2B:
+            duration = duration * 2 * abs(currentMensur->GetTempus()) * abs(currentMensur->GetProlatio());
+            break;
+        case DURATION_3B:
+            duration = duration * 3 * abs(currentMensur->GetTempus()) * abs(currentMensur->GetProlatio());
+            break;
         case DURATION_maxima: duration = duration * abs(currentMensur->GetModusmaior()); [[fallthrough]];
         case DURATION_long: duration = duration * abs(currentMensur->GetModusminor()); [[fallthrough]];
         case DURATION_breve: duration = duration * abs(currentMensur->GetTempus()); [[fallthrough]];
@@ -256,6 +266,8 @@ data_DURATION DurationInterface::CalcActualDur(data_DURATION dur) const
         case DURATION_semiminima: return DURATION_4;
         case DURATION_fusa: return DURATION_8;
         case DURATION_semifusa: return DURATION_16;
+        case DURATION_2B: return DURATION_2B;
+        case DURATION_3B: return DURATION_3B;
         default: return DURATION_NONE;
     }
 }

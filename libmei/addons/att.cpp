@@ -189,6 +189,8 @@ std::string Att::DurationToStr(data_DURATION data) const
         case DURATION_semiminima: value = "semiminima"; break;
         case DURATION_fusa: value = "fusa"; break;
         case DURATION_semifusa: value = "semifusa"; break;
+        case DURATION_2B: value = "2B"; break;
+        case DURATION_3B: value = "3B"; break;
         case DURATION_long: value = "long"; break;
         case DURATION_breve: value = "breve"; break;
         case DURATION_1: value = "1"; break;
