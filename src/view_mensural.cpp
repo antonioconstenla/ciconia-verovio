@@ -57,19 +57,21 @@ void View::DrawMensuralNote(DeviceContext *dc, LayerElement *element, Layer *lay
 
     /************** Noteheads: **************/
 
-    // Ligature, maxima,longa, and brevis
+    // Ligature, maxima, longa, and brevis. A resolved SMuFL extSym glyph is visual-only
+    // and replaces both the default SMuFL notehead and the geometric maxima-to-brevis path.
     if (note->IsInLigature() && !m_options->m_ligatureAsBracket.GetValue()) {
         this->DrawLigatureNote(dc, element, layer, staff);
     }
-    else if (drawingDur < DURATION_1) {
-        this->DrawMaximaToBrevis(dc, y, element, layer, staff);
-    }
-    // Semibrevis and shorter
     else {
-        char32_t code = note->GetMensuralNoteheadGlyph();
-        dc->StartCustomGraphic("notehead");
-        this->DrawSmuflCode(dc, x, y, code, staff->m_drawingStaffSize, false);
-        dc->EndCustomGraphic();
+        const char32_t code = note->GetMensuralNoteheadGlyph();
+        if (code) {
+            dc->StartCustomGraphic("notehead");
+            this->DrawSmuflCode(dc, x, y, code, staff->m_drawingStaffSize, false);
+            dc->EndCustomGraphic();
+        }
+        else if (drawingDur < DURATION_1) {
+            this->DrawMaximaToBrevis(dc, y, element, layer, staff);
+        }
     }
 
     /************ Draw children (verse / syl) ************/

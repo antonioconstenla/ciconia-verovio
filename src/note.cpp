@@ -602,15 +602,32 @@ char32_t Note::GetMensuralNoteheadGlyph() const
 {
     assert(this->IsMensuralDur());
 
+    const Staff *staff = this->GetAncestorStaff();
+    const bool mensural_black = (staff->m_drawingNotationType == NOTATIONTYPE_mensural_black);
+
+    // Visual-only SMuFL extSym override for mensural.black. @dur / @dur.quality remain
+    // the logical duration; a missing or unknown glyph falls back to the duration glyph.
+    const Resources *resources = this->GetDocResources();
+    if (resources && mensural_black) {
+        const bool smuflAuth = !this->HasGlyphAuth() || (this->GetGlyphAuth() == "smufl");
+        if (smuflAuth) {
+            if (this->HasGlyphNum()) {
+                const char32_t code = this->GetGlyphNum();
+                if (resources->GetGlyph(code)) return code;
+            }
+            else if (this->HasGlyphName()) {
+                const char32_t code = resources->GetGlyphCode(this->GetGlyphName());
+                if (code && resources->GetGlyph(code)) return code;
+            }
+        }
+    }
+
     data_DURATION drawingDur = this->GetDrawingDur();
 
     // No SMuFL code used for these values
     if (drawingDur < DURATION_1) {
         return 0;
     }
-
-    const Staff *staff = this->GetAncestorStaff();
-    bool mensural_black = (staff->m_drawingNotationType == NOTATIONTYPE_mensural_black);
 
     char32_t code = 0;
     if (mensural_black) {

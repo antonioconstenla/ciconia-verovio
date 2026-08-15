@@ -192,6 +192,17 @@ const Glyph *Resources::GetGlyph(char32_t smuflCode) const
             return glyph;
         }
     }
+    // Bravura is the complete SMuFL source (name table is built from it). When Leipzig
+    // or another selected font lacks a glyph, use genuine Bravura contours instead of
+    // copying them into Leipzig.
+    if (this->IsFontLoaded(BRAVURA) && (m_currentFontName != BRAVURA) && (m_fallbackFontName != BRAVURA)) {
+        const GlyphTable &bravuraTable = m_loadedFonts.at(BRAVURA).GetGlyphTable();
+        if (auto glyphIter = bravuraTable.find(smuflCode); glyphIter != bravuraTable.end()) {
+            const Glyph *glyph = &glyphIter->second;
+            m_cachedGlyph = std::make_pair(glyphIter->first, glyph);
+            return glyph;
+        }
+    }
     return NULL;
 }
 
@@ -413,7 +424,9 @@ bool Resources::LoadFont(const std::string &fontName, ZipFileReader *zipFile)
         }
     }
 
-    if (isFallback && glyphTable.size() < SMUFL_COUNT) {
+    // Bravura is the complete SMuFL source. Leipzig is Verovio's default font but a subset;
+    // it is not required to contain every supported glyph (e.g. E959/E95B exist only in Bravura).
+    if ((fontName == BRAVURA) && glyphTable.size() < SMUFL_COUNT) {
         LogError("Expected %d default SMuFL glyphs but could load only %d.", SMUFL_COUNT, glyphTable.size());
         return false;
     }

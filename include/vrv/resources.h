@@ -90,7 +90,8 @@ public:
      * Retrieving glyphs
      */
     ///@{
-    /** Returns the glyph (if exists) for a glyph code in the current SMuFL font */
+    /** Returns the glyph (if exists) for a glyph code in the current SMuFL font, then the
+     * configured fallback font, then Bravura when that font still lacks the glyph */
     const Glyph *GetGlyph(char32_t smuflCode) const;
     /** Returns the glyph (if exists) for a glyph name in the current SMuFL font */
     const Glyph *GetGlyph(const std::string &smuflName) const;

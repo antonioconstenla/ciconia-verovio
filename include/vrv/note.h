@@ -200,7 +200,9 @@ public:
     ///@}
 
     /**
-     * Return the SMuFL code for a mensural note looking at the staff notation type, the coloration and the duration
+     * Return the SMuFL code for a mensural note looking at the staff notation type, the coloration and the duration.
+     * For notationtype="mensural.black", a valid SMuFL att.extSym (@glyph.num / @glyph.name) overrides the visual
+     * glyph only; logical @dur / @dur.quality are unchanged.
      */
     char32_t GetMensuralNoteheadGlyph() const;
 

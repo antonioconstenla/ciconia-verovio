@@ -728,6 +728,8 @@
   <g c="E928" x="0.0" y="-250.0" w="294.0" h="503.0" h-a-x="293" n="mensuralProportion3" />
   <g c="E929" x="0.0" y="-250.0" w="379.0" h="500.0" h-a-x="379" n="mensuralProportion4" />
   <g c="E938" x="0.0" y="-141.0" w="282.0" h="282.0" h-a-x="282" n="mensuralNoteheadSemibrevisBlack" />
+  <g c="E959" x="0.0" y="-649.0" w="282.0" h="790.0" h-a-x="282" n="mensuralBlackSemibrevisCaudata" />
+  <g c="E95B" x="0.0" y="-245.0" w="511.0" h="386.0" h-a-x="511" n="mensuralBlackSemibrevisOblique" />
   <g c="E939" x="1.0" y="-141.0" w="282.0" h="282.0" h-a-x="283" n="mensuralNoteheadSemibrevisVoid" />
   <g c="E93C" x="0.0" y="-184.0" w="320.0" h="369.0" h-a-x="320" n="mensuralNoteheadMinimaWhite">
     <a n="stemDownNW" x="0.0" y="0.0" />
