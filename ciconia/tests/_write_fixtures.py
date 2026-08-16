@@ -105,6 +105,10 @@ FILES = {
         '<note xml:id="n8" pname="e" oct="4" dur="minima" stem.dir="up" glyph.auth="smufl" glyph.num="U+E95B"/>',
         "2",
     ),
+    "notes/n9-minima-oblique-stem-down.mei": wrap(
+        '<note xml:id="n9" pname="e" oct="4" dur="minima" stem.dir="down" glyph.auth="smufl" glyph.name="mensuralBlackSemibrevisOblique"/>',
+        "2",
+    ),
     "notes/invalid-note-dur-2B.mei": wrap(
         '<note xml:id="bad2b" pname="c" oct="4" dur="2B"/>',
         "2",

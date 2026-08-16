@@ -59,9 +59,8 @@ Open questions for upstream:
 
 - Is a global Bravura completeness fallback acceptable, or should only named
   extSym glyphs request Bravura?
-- `fonts/supported.xml` was updated, but `smufl.h` was patched by hand and
-  `SMUFL_COUNT` remains **650** while the enum/list has **652** entries.
-  Upstream should regenerate via `fonts/generate.py`.
+- `fonts/supported.xml` was updated. `smufl.h` `SMUFL_COUNT` is **652** and
+  matches the enum; `fonts/generate.py` reproduces it exactly.
 - LoadFont completeness is now checked against Bravura, allowing Leipzig to
   remain a subset.
 - Do not copy Bravura outlines into `data/Leipzig/`.

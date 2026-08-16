@@ -22,6 +22,10 @@ REST_GROUP = re.compile(r'<g id="([^"]+)" class="rest">(.*?)</g>', re.DOTALL)
 NOTE_GROUP = re.compile(r'<g id="([^"]+)" class="note">(.*?)</g>', re.DOTALL)
 STAFF_Y = re.compile(r'<path d="M[0-9.]+ ([0-9.]+) L')
 USE_HREF = re.compile(r'xlink:href="#(E[0-9A-F]+)')
+USE_TRANSLATE = re.compile(
+    r'<use xlink:href="#(E[0-9A-F]+)[^"]*" transform="translate\(([^,]+), ([^)]+)\) scale\(([^,]+),'
+)
+GLYPH_BOX_W = re.compile(r'<g c="([A-F0-9]+)"[^>]*\sw="([0-9.]+)"')
 RECT = re.compile(
     r'<rect\s[^>]*x="([^"]+)"\s+y="([^"]+)"\s+height="([^"]+)"\s+width="([^"]+)"'
 )
@@ -118,6 +122,21 @@ def roundtrip_element(mei: str, xml_id: str) -> tuple[str | None, str | None, st
     return None, None, None
 
 
+def resource_glyph_width(font_xml: Path, code: str) -> float:
+    text = font_xml.read_text(encoding="utf-8")
+    for glyph, width in GLYPH_BOX_W.findall(text):
+        if glyph == code:
+            return float(width)
+    raise AssertionError(f"glyph {code} not found in {font_xml}")
+
+
+def use_translate_scale(svg: str, code: str) -> tuple[float, float, float]:
+    for found, x, y, sc in USE_TRANSLATE.findall(svg):
+        if found == code:
+            return float(x), float(y), float(sc)
+    raise AssertionError(f"no <use> for {code}")
+
+
 class RestGeometryTests(unittest.TestCase):
     def assert_rest(
         self,
@@ -192,6 +211,29 @@ class NoteGlyphTests(unittest.TestCase):
         tag, dur, _ = roundtrip_element(mei, "n1")
         self.assertEqual(tag, "note")
         self.assertEqual(dur, "minima")
+
+    def test_n1_oblique_minima_stem_centerline_on_rhombus_apex(self):
+        svg, _, _ = self.render_note("notes/n1-minima-oblique-stem-up.mei")
+        e95b_w = resource_glyph_width(DATA / "Bravura.xml", "E95B")
+        e938_w = resource_glyph_width(DATA / "Leipzig.xml", "E938")
+        stem_w = resource_glyph_width(DATA / "Leipzig.xml", "E93E")
+        head_x, _head_y, head_sc = use_translate_scale(svg, "E95B")
+        stem_x, _stem_y, stem_sc = use_translate_scale(svg, "E93E")
+        attachment_x = head_x + (e95b_w - e938_w / 2.0) * head_sc
+        stem_center_x = stem_x + (stem_w * stem_sc) / 2.0
+        self.assertLessEqual(abs(stem_center_x - attachment_x), 1.0)
+        full_bbox_center = head_x + (e95b_w / 2.0) * head_sc
+        self.assertGreater(abs(stem_center_x - full_bbox_center), 10.0)
+
+    def test_n9_diagnostic_oblique_stem_down_renders(self):
+        svg, mei, _ = self.render_note("notes/n9-minima-oblique-stem-down.mei")
+        inner = note_inner(svg, "n9")
+        self.assertIn("E95B", inner)
+        self.assertIn("E93F", svg)
+        self.assertIn('class="stem"', svg)
+        self.assertNotIn("E93E", svg)
+        tag, dur, _ = roundtrip_element(mei, "n9")
+        self.assertEqual((tag, dur), ("note", "minima"))
 
     def test_n2_oblique_semibrevis_has_no_stem(self):
         svg, mei, _ = self.render_note("notes/n2-semibrevis-perfecta-oblique.mei")

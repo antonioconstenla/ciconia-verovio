@@ -48,6 +48,13 @@ Missing Leipzig glyphs (E959, E95B) use genuine **Bravura** contours via a
 tertiary `Resources::GetGlyph` fallback. Those outlines are not installed as
 Leipzig.
 
+Manual test 001 found an explicit Oblique minima (`dur="minima"` + E95B +
+`stem.dir="up"`) with the combining stem horizontally detached from the rhombus.
+The approved visual invariant is **STEM_CENTERLINE_ON_RHOMBUS_APEX**: the up-stem
+centerline is the horizontal center of the ordinary black diamond (E938)
+right-aligned in E95B. Attachment uses runtime glyph metrics, not fixture
+coordinates. No mei-scribe workaround is required.
+
 ## Lifecycle
 
 If an upstream Verovio release later includes one of these fixes, drop the

@@ -199,7 +199,21 @@ void View::DrawMensuralStem(DeviceContext *dc, Note *note, Staff *staff, data_ST
         }
     }
 
-    this->DrawSmuflCode(dc, xn + radius - halfStemWidth, originY, code, staff->m_drawingStaffSize, drawingCueSize);
+    int stemX = xn + radius - halfStemWidth;
+    // E95B Oblique = left-side cauda + right-hand ordinary black diamond (E938).
+    // Approved up-stem invariant: stem centerline on the rhombus apex, which is
+    // the horizontal center of that right-aligned diamond:
+    //   apex = GetGlyphRight(E95B) - GetGlyphWidth(E938)/2
+    // DrawSmuflCode places the stem glyph by its left, so stem_left = apex - halfStemWidth.
+    // Down-stem E95B is unchanged: no paleographic requirement has been acquired.
+    if ((dir == STEMDIRECTION_up) && (note->HasGlyphNum() || note->HasGlyphName())
+        && (note->GetMensuralNoteheadGlyph() == SMUFL_E95B_mensuralBlackSemibrevisOblique)) {
+        const int apexX
+            = m_doc->GetGlyphRight(SMUFL_E95B_mensuralBlackSemibrevisOblique, staffSize, drawingCueSize)
+            - m_doc->GetGlyphWidth(SMUFL_E938_mensuralNoteheadSemibrevisBlack, staffSize, drawingCueSize) / 2;
+        stemX = xn + apexX - halfStemWidth;
+    }
+    this->DrawSmuflCode(dc, stemX, originY, code, staff->m_drawingStaffSize, drawingCueSize);
 
     // Store the stem direction ?
     note->SetDrawingStemDir(dir);
