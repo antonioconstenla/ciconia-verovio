@@ -39,6 +39,15 @@ Tokens `2B`/`3B` are valid **rest** durations in MEI 5.1; they are not valid
 note durations. Invalid `<note dur="2B"/>` warns and does not round-trip as a
 legitimate duration.
 
+The 3B rest is a geometric rectangle **3 staff spaces** high (Leipzig E9F1 is 4
+spaces and must not be scaled). Manual O Felix v2 inspection (kit 002) approved
+P1/P3/P4; P2 native height and graphy were approved, but the first stroke
+(`3 * GetDrawingStemWidth`, a note-stem metric) was visually too heavy. The
+human-approved thickness is `GetGlyphWidth` of Leipzig
+`mensuralRestLongaImperfecta` (E9F2), the same visible bar width as ordinary
+mensural rests E9F2–E9F5. Standard MEI remains `<rest dur="3B"/>`. No
+mei-scribe workaround is required. Stock Verovio 6.2.1 does not implement this.
+
 ### Patch 2 — explicit mensural note extSym rendering
 
 `note@glyph.name` / `note@glyph.num` are visual overrides only.

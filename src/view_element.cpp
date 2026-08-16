@@ -1614,12 +1614,16 @@ void View::DrawRest(DeviceContext *dc, LayerElement *element, Layer *layer, Staf
 
     const int mensuralSpaces = rest->GetMensuralRestStaffSpaces();
     if ((mensuralSpaces == 3) && !rest->HasGlyphName() && !rest->HasGlyphNum()) {
-        // Geometric 3-space rest in staff-space units. Do not scale E9F1.
+        // Geometric 3-space rest. Height is 3 staff spaces; thickness matches
+        // the Leipzig mensural rest family (E9F2/E9F3/E9F4/E9F5 share w=40).
+        // Do not use 3*stemWidth (note-stem metric; ~1.875x too heavy).
         const int space = m_doc->GetDrawingDoubleUnit(staffSize);
-        const int width = m_doc->GetDrawingStemWidth(staffSize) * 3;
+        const int width = m_doc->GetGlyphWidth(
+            SMUFL_E9F2_mensuralRestLongaImperfecta, staffSize, drawingCueSize);
         const int topY = staff->GetDrawingY();
         const int bottomY = topY - (staff->m_drawingLines - 1) * space;
         const int restTop = bottomY + 3 * space;
+        // Left-aligned at GetDrawingX, like Leipzig E9F2–E9F5.
         this->DrawFilledRectangle(dc, x, bottomY, x + width, restTop);
         this->DrawLayerChildren(dc, rest, layer, staff, measure);
         return;

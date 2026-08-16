@@ -189,6 +189,45 @@ class RestGeometryTests(unittest.TestCase):
     def test_r8_unspecified_longa_keeps_two_space_fallback(self):
         self.assert_rest("rests/r8-longa-unspecified-mm.mei", "r8", 2.0, "longa", "E9F2")
 
+    def test_r4_3B_stroke_matches_e9f2_family(self):
+        src = FIXTURES / "rests/r4-explicit-3B.mei"
+        rc_svg, svg, err = render(src, "svg")
+        self.assertEqual(rc_svg, 0, err)
+        inner = rest_inner(svg, "r4")
+        rects = RECT.findall(inner)
+        self.assertTrue(rects)
+        x, _y, height, width = (float(v) for v in rects[0])
+        space = staff_space(svg)
+        self.assertAlmostEqual(height / space, 3.0, places=2)
+        rc2, svg2, err2 = render(FIXTURES / "rests/r3-explicit-2B.mei", "svg")
+        self.assertEqual(rc2, 0, err2)
+        _tx, _ty, sc = use_translate_scale(svg2, "E9F2")
+        expected = resource_glyph_width(DATA / "Leipzig.xml", "E9F2") * sc
+        self.assertAlmostEqual(width, expected, delta=2.0)
+        stem_triple = 3.0 * 0.20 * (space / 2.0)
+        self.assertLess(abs(width - expected), abs(width - stem_triple) / 2.0)
+        inner2 = rest_inner(svg2, "r3")
+        self.assertIn("E9F2", inner2)
+        self.assertFalse(RECT.findall(inner2))
+
+    def test_r4_3B_occupies_same_three_staff_slots(self):
+        src = FIXTURES / "rests/r4-explicit-3B.mei"
+        rc_svg, svg, err = render(src, "svg")
+        self.assertEqual(rc_svg, 0, err)
+        space = staff_space(svg)
+        ys = [float(y) for y in STAFF_Y.findall(svg)]
+        uniq: list[float] = []
+        for y in ys:
+            if not uniq or abs(y - uniq[-1]) > 1e-6:
+                uniq.append(y)
+            if len(uniq) >= 5:
+                break
+        inner = rest_inner(svg, "r4")
+        _x, y, height, _w = (float(v) for v in RECT.findall(inner)[0])
+        self.assertAlmostEqual(y, uniq[1], delta=1.0)
+        self.assertAlmostEqual(y + height, uniq[4], delta=1.0)
+        self.assertAlmostEqual(height / space, 3.0, places=2)
+
 
 class NoteGlyphTests(unittest.TestCase):
     def render_note(self, rel: str) -> tuple[str, str, str]:

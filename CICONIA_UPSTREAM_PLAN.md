@@ -31,7 +31,9 @@ CLA: a signed Verovio CLA is required before any real PR.
 - Unspecified longa (`modusminor` absent): Ciconia keeps the **2-space E9F2** drawing fallback while alignment already treats unspecified modus as ternary. #1405 preferred a **visual** ternary default. This policy must be explicit in an upstream discussion.
 - Architecture is Option C (rest-only consume). `2B`/`3B` live in `data_DURATION` and currently pass through `GetActualDur()` as themselves. A Verovio review may want `GetActualDur()` mapped to `DURATION_long` while drawing/time stay explicit.
 - `rest@spaces` is unread; MEI already has the attribute.
-- 3-space rests are a geometric rectangle (`3 * GetDrawingDoubleUnit`); E9F1 is **4** staff spaces and must not be scaled as 3B.
+- 3-space rest **height** is `3 * GetDrawingDoubleUnit`. Stroke thickness is
+  `GetGlyphWidth(E9F2)` (Leipzig mensural rest family), not `3 * GetDrawingStemWidth`.
+  E9F1 is **4** staff spaces and must not be scaled as 3B.
 - Default `Att::StrToDuration` still rejects `2B`/`3B` on notes (intentional).
 - `libmei/addons` is the appropriate layer: `data.DURATIONRESTS` is excluded from codegen.
 
