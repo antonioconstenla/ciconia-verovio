@@ -353,5 +353,157 @@ class InvalidNoteDurationTests(unittest.TestCase):
         self.assert_invalid("notes/invalid-note-dur-3B.mei", "bad3b", "3B")
 
 
+# ---------------------------------------------------------------------------
+# Explicit @lig="obliqua" even-run pairing (drawing-shape / SVG geometry)
+#
+# LIGATURE_OBLIQUE on member index N means connection N → N+1 is oblique.
+# Even contiguous O runs pair left-to-right. Length-1 and odd>=3 runs keep
+# legacy upstream behavior (ODD_RUN_GT1_POLICY_DEFERRED).
+# ---------------------------------------------------------------------------
+
+_SVG_ROOT_ID = re.compile(r'(<svg\b[^>]*\bid=")[^"]+(")')
+
+
+def normalize_svg(svg: str) -> str:
+    """Drop volatile root svg id so legacy comparisons are stable."""
+    return _SVG_ROOT_ID.sub(r"\1NORMALIZED\2", svg)
+
+
+def _note_inners(svg: str) -> dict[str, str]:
+    return {gid: inner for gid, inner in NOTE_GROUP.findall(svg)}
+
+
+def _path_top_delta(inner: str) -> float:
+    match = re.search(r'<path d="(M[^"]+?)L', inner)
+    if not match:
+        return 0.0
+    coords = [
+        (float(a), float(b))
+        for a, b in re.findall(r"(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)", match.group(1))
+    ]
+    if len(coords) < 2:
+        return 0.0
+    return abs(coords[-1][1] - coords[0][1])
+
+
+def _is_oblique_end_half(inner: str) -> bool:
+    return _path_top_delta(inner) > 5.0 and "<rect" not in inner
+
+
+def oblique_connection_starts(svg: str, note_ids: list[str]) -> list[int]:
+    """Infer LIGATURE_OBLIQUE connection-start indices from rendered note geometry."""
+    inners = _note_inners(svg)
+    ordered = [inners[nid] for nid in note_ids]
+    starts: list[int] = []
+    for i in range(len(ordered) - 1):
+        left, right = ordered[i], ordered[i + 1]
+        if _path_top_delta(left) <= 5.0 or _path_top_delta(right) <= 5.0:
+            continue
+        if _is_oblique_end_half(right) or i + 1 == len(ordered) - 1:
+            starts.append(i)
+    return starts
+
+
+def has_cop_left_up_stem(svg: str, note_id: str) -> bool:
+    """True when the note carries a tall left stem (LIGATURE_STEM_LEFT_UP)."""
+    inner = _note_inners(svg)[note_id]
+    for _x, y, height, _w in RECT.findall(inner):
+        if float(height) >= 300.0 and float(y) < 1600.0:
+            return True
+    return False
+
+
+class LigatureObliquaPairingTests(unittest.TestCase):
+    def render_lig(self, rel: str) -> str:
+        rc, svg, err = render(FIXTURES / rel, "svg")
+        self.assertEqual(rc, 0, err)
+        self.assertTrue(svg)
+        return svg
+
+    def test_a_rr_no_oblique_connection(self):
+        svg = self.render_lig("ligatures/a-rr.mei")
+        self.assertEqual(oblique_connection_starts(svg, ["n1", "n2"]), [])
+
+    def test_b_oo_pair_1_2_only(self):
+        svg = self.render_lig("ligatures/b-oo.mei")
+        self.assertEqual(oblique_connection_starts(svg, ["n1", "n2"]), [0])
+
+    def test_c_oooo_pairs_1_2_and_3_4(self):
+        svg = self.render_lig("ligatures/c-oooo.mei")
+        self.assertEqual(oblique_connection_starts(svg, ["n1", "n2", "n3", "n4"]), [0, 2])
+
+    def test_d_roor_pair_2_3_only(self):
+        svg = self.render_lig("ligatures/d-roor.mei")
+        self.assertEqual(oblique_connection_starts(svg, ["n1", "n2", "n3", "n4"]), [1])
+
+    def test_g_oooooo_three_even_pairs(self):
+        svg = self.render_lig("ligatures/g-oooooo.mei")
+        self.assertEqual(
+            oblique_connection_starts(svg, ["n1", "n2", "n3", "n4", "n5", "n6"]),
+            [0, 2, 4],
+        )
+
+    def test_i_cop_roor_altera_preserves_up_stem_and_pairs_2_3(self):
+        svg = self.render_lig("ligatures/i-cop-roor-altera.mei")
+        self.assertTrue(has_cop_left_up_stem(svg, "n1"))
+        self.assertEqual(oblique_connection_starts(svg, ["n1", "n2", "n3", "n4"]), [1])
+
+    def _baseline_svg(self, rel: str) -> str:
+        baseline = os.environ.get("CICONIA_BASELINE_VEROVIO")
+        if not baseline or not Path(baseline).exists():
+            self.skipTest("set CICONIA_BASELINE_VEROVIO to base 027a45f CLI")
+        src = FIXTURES / rel
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp) / "base.svg"
+            proc = subprocess.run(
+                [
+                    baseline,
+                    "-r",
+                    str(DATA),
+                    "-f",
+                    "mei",
+                    "-t",
+                    "svg",
+                    "-o",
+                    str(out),
+                    str(src),
+                ],
+                capture_output=True,
+                text=True,
+                timeout=90,
+            )
+            self.assertEqual(proc.returncode, 0, proc.stderr)
+            return out.read_text(encoding="utf-8")
+
+    def test_legacy_length1_orr_unchanged_vs_baseline_cli(self):
+        # LEGACY_ODD_RUN_BEHAVIOR_PRESERVED
+        ids = ["n1", "n2", "n3"]
+        patched = self.render_lig("ligatures/e-orr.mei")
+        base_svg = self._baseline_svg("ligatures/e-orr.mei")
+        self.assertEqual(
+            oblique_connection_starts(patched, ids),
+            oblique_connection_starts(base_svg, ids),
+        )
+
+    def test_legacy_length1_rorr_unchanged_vs_baseline_cli(self):
+        ids = ["n1", "n2", "n3", "n4"]
+        patched = self.render_lig("ligatures/f-rorr.mei")
+        base_svg = self._baseline_svg("ligatures/f-rorr.mei")
+        self.assertEqual(
+            oblique_connection_starts(patched, ids),
+            oblique_connection_starts(base_svg, ids),
+        )
+
+    def test_ooo_odd_run_gt1_matches_baseline_cli(self):
+        # ODD_RUN_GT1_POLICY_DEFERRED — do not invent new OOO semantics.
+        ids = ["n1", "n2", "n3"]
+        patched = self.render_lig("ligatures/h-ooo.mei")
+        base_svg = self._baseline_svg("ligatures/h-ooo.mei")
+        self.assertEqual(
+            oblique_connection_starts(patched, ids),
+            oblique_connection_starts(base_svg, ids),
+        )
+
+
 if __name__ == "__main__":
     unittest.main()

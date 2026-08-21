@@ -9,6 +9,10 @@
 
 //----------------------------------------------------------------------------
 
+#include <vector>
+
+//----------------------------------------------------------------------------
+
 #include "doc.h"
 #include "ligature.h"
 #include "nc.h"
@@ -18,6 +22,66 @@
 //----------------------------------------------------------------------------
 
 namespace vrv {
+
+//----------------------------------------------------------------------------
+// Explicit @lig="obliqua" member-run pairing
+//----------------------------------------------------------------------------
+
+/**
+ * Translate contiguous even-length runs of note-level @lig="obliqua" into
+ * non-overlapping LIGATURE_OBLIQUE connection starts.
+ *
+ * MEI @lig marks member participation in an obliqua component; it is not an
+ * "outgoing edge" flag. Upstream/Ciconia previously treated each new O as a
+ * connection start that cleared the previous start, so OOOO kept only 3–4 and
+ * ROOR kept only 3–4.
+ *
+ * Even runs (length >= 2): pair left-to-right (1–2, 3–4, …).
+ * Length-1 runs: leave legacy behavior (single O starts the following connection).
+ * Odd runs length >= 3: leave legacy behavior (ODD_RUN_GT1_POLICY_DEFERRED).
+ *
+ * Only the LIGATURE_OBLIQUE bit is modified; stem/proprietas bits are preserved.
+ */
+static void NormalizeExplicitObliquaMemberRuns(Ligature *ligature, const ListOfObjects &notes)
+{
+    const int noteCount = static_cast<int>(notes.size());
+    if (noteCount < 2 || static_cast<int>(ligature->m_drawingShapes.size()) != noteCount) {
+        return;
+    }
+
+    std::vector<bool> isObliquaMember(noteCount, false);
+    int idx = 0;
+    for (Object *object : notes) {
+        Note *note = vrv_cast<Note *>(object);
+        assert(note);
+        isObliquaMember[idx++] = (note->GetLig() == LIGATUREFORM_obliqua);
+    }
+
+    int runStart = 0;
+    while (runStart < noteCount) {
+        if (!isObliquaMember[runStart]) {
+            ++runStart;
+            continue;
+        }
+        int runEnd = runStart + 1;
+        while (runEnd < noteCount && isObliquaMember[runEnd]) ++runEnd;
+        const int runLen = runEnd - runStart;
+
+        // Length 1 and odd length >= 3: preserve legacy/upstream visual behavior.
+        if ((runLen >= 2) && ((runLen % 2) == 0)) {
+            // Clear erroneous overlapping OBLIQUE starts attributable to this run.
+            for (int i = runStart; i < runEnd; ++i) {
+                ligature->m_drawingShapes.at(i) &= ~LIGATURE_OBLIQUE;
+            }
+            // Non-overlapping pair starts: runStart, runStart+2, ...
+            for (int i = runStart; i + 1 < runEnd; i += 2) {
+                ligature->m_drawingShapes.at(i) |= LIGATURE_OBLIQUE;
+            }
+        }
+
+        runStart = runEnd;
+    }
+}
 
 //----------------------------------------------------------------------------
 // CalcLigatureOrNeumePosFunctor
@@ -185,6 +249,10 @@ FunctorCode CalcLigatureOrNeumePosFunctor::VisitLigature(Ligature *ligature)
         ++n1;
         ++n2;
     }
+
+    // Explicit member @lig="obliqua" runs: normalize even-length pairing after
+    // duration heuristics and the legacy per-O start/clear pass.
+    NormalizeExplicitObliquaMemberRuns(ligature, notes);
 
     /**** Set the xRel position for each note ****/
 
