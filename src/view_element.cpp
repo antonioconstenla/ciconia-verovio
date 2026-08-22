@@ -1618,8 +1618,7 @@ void View::DrawRest(DeviceContext *dc, LayerElement *element, Layer *layer, Staf
         // the Leipzig mensural rest family (E9F2/E9F3/E9F4/E9F5 share w=40).
         // Do not use 3*stemWidth (note-stem metric; ~1.875x too heavy).
         const int space = m_doc->GetDrawingDoubleUnit(staffSize);
-        const int width = m_doc->GetGlyphWidth(
-            SMUFL_E9F2_mensuralRestLongaImperfecta, staffSize, drawingCueSize);
+        const int width = m_doc->GetGlyphWidth(SMUFL_E9F2_mensuralRestLongaImperfecta, staffSize, drawingCueSize);
         const int topY = staff->GetDrawingY();
         const int bottomY = topY - (staff->m_drawingLines - 1) * space;
         const int restTop = bottomY + 3 * space;

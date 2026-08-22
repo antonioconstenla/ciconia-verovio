@@ -208,8 +208,7 @@ void View::DrawMensuralStem(DeviceContext *dc, Note *note, Staff *staff, data_ST
     // Down-stem E95B is unchanged: no paleographic requirement has been acquired.
     if ((dir == STEMDIRECTION_up) && (note->HasGlyphNum() || note->HasGlyphName())
         && (note->GetMensuralNoteheadGlyph() == SMUFL_E95B_mensuralBlackSemibrevisOblique)) {
-        const int apexX
-            = m_doc->GetGlyphRight(SMUFL_E95B_mensuralBlackSemibrevisOblique, staffSize, drawingCueSize)
+        const int apexX = m_doc->GetGlyphRight(SMUFL_E95B_mensuralBlackSemibrevisOblique, staffSize, drawingCueSize)
             - m_doc->GetGlyphWidth(SMUFL_E938_mensuralNoteheadSemibrevisBlack, staffSize, drawingCueSize) / 2;
         stemX = xn + apexX - halfStemWidth;
     }
