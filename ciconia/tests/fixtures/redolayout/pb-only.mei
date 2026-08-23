@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-model href="https://music-encoding.org/schema/5.1/mei-all.rng" type="application/xml" schematypens="http://relaxng.org/ns/structure/1.0"?>
+<mei xmlns="http://www.music-encoding.org/ns/mei" meiversion="5.1">
+  <meiHead>
+    <fileDesc>
+      <titleStmt><title>Phase 6C3 PB-only</title></titleStmt>
+      <pubStmt/>
+    </fileDesc>
+  </meiHead>
+  <music>
+    <body>
+      <mdiv xml:id="mdiv-1" n="1">
+        <score>
+          <scoreDef>
+            <staffGrp>
+              <staffDef n="1" lines="5" notationtype="mensural.black">
+                <clef shape="C" line="3"/>
+              </staffDef>
+            </staffGrp>
+          </scoreDef>
+          <section xml:id="sec-1">
+            <staff n="1">
+              <layer n="1">
+                <note xml:id="pb-pre-a" dur="brevis" oct="4" pname="c"/>
+                <note xml:id="pb-pre-b" dur="semibrevis" oct="4" pname="d"/>
+              </layer>
+            </staff>
+          </section>
+          <pb xml:id="pb-1"/>
+          <section xml:id="sec-2">
+            <staff n="1">
+              <layer n="1">
+                <note xml:id="pb-post-a" dur="brevis" oct="4" pname="e"/>
+                <note xml:id="pb-post-b" dur="semibrevis" oct="4" pname="f"/>
+              </layer>
+            </staff>
+          </section>
+        </score>
+      </mdiv>
+    </body>
+  </music>
+</mei>
