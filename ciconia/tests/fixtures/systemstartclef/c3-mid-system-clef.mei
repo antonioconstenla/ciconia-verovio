@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mei xmlns="http://www.music-encoding.org/ns/mei" meiversion="5.1">
+  <meiHead><fileDesc><titleStmt><title>6C4C D3 mid-system explicit</title></titleStmt><pubStmt/></fileDesc></meiHead>
+  <music><body><mdiv n="1"><score>
+    <scoreDef><staffGrp>
+      <staffDef n="1" lines="5" notationtype="mensural.black"><clef shape="C" line="2"/></staffDef>
+    </staffGrp></scoreDef>
+    <section xml:id="s1"><staff n="1"><layer n="1">
+      <note xml:id="pre" dur="brevis" oct="4" pname="g"/>
+    </layer></staff></section>
+    <sb xml:id="sb1"/>
+    <section xml:id="s2"><staff n="1"><layer n="1">
+      <note xml:id="post1" dur="brevis" oct="4" pname="a"/>
+      <clef xml:id="later-c1" shape="C" line="1"/>
+      <note xml:id="post2" dur="brevis" oct="4" pname="e"/>
+    </layer></staff></section>
+  </score></mdiv></body></music>
+</mei>

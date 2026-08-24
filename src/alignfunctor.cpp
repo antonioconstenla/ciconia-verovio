@@ -13,6 +13,7 @@
 #include "doc.h"
 #include "dot.h"
 #include "fig.h"
+#include "clef.h"
 #include "layer.h"
 #include "ligature.h"
 #include "nc.h"
@@ -147,6 +148,14 @@ FunctorCode AlignHorizontallyFunctor::VisitLayerElement(LayerElement *layerEleme
     assert(!layerElement->GetAlignment());
 
     if (layerElement->IsScoreDefElement()) return FUNCTOR_SIBLINGS;
+
+    // Layer clef promoted into staffDef system-start drawing: already aligned
+    // via VisitLayer → GetStaffDefClef(); skip ordinary ALIGNMENT_CLEF.
+    if (layerElement->Is(CLEF)) {
+        Clef *clef = vrv_cast<Clef *>(layerElement);
+        assert(clef);
+        if (clef->IsDrawingAbsorbedIntoStaffDef()) return FUNCTOR_CONTINUE;
+    }
 
     layerElement->SetScoreDefRole(m_scoreDefRole);
 

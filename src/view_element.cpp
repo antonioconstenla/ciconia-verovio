@@ -681,6 +681,11 @@ void View::DrawClef(DeviceContext *dc, LayerElement *element, Layer *layer, Staf
 
     if (clef->m_crossStaff) staff = clef->m_crossStaff;
 
+    // Promoted into staffDef system-start drawing (DrawStaffDef); do not redraw.
+    if (clef->IsDrawingAbsorbedIntoStaffDef()) {
+        return;
+    }
+
     // hidden clef
     if (clef->GetVisible() == BOOLEAN_false) {
         dc->StartGraphic(element, "", element->GetID());
