@@ -668,8 +668,8 @@ FunctorCode ResetHorizontalAlignmentFunctor::VisitFloatingObject(FloatingObject 
 
 FunctorCode ResetHorizontalAlignmentFunctor::VisitLayer(Layer *layer)
 {
-    if (layer->GetStaffDefClef()) {
-        this->VisitClef(layer->GetStaffDefClef());
+    for (Clef *clef : layer->GetStaffDefClefs()) {
+        this->VisitClef(clef);
     }
     if (layer->GetStaffDefKeySig()) {
         this->VisitKeySig(layer->GetStaffDefKeySig());

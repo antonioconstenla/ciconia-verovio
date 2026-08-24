@@ -17,6 +17,7 @@
 #include "accid.h"
 #include "beam.h"
 #include "clef.h"
+#include "clefgrp.h"
 #include "comparison.h"
 #include "custos.h"
 #include "divline.h"
@@ -54,7 +55,7 @@ Layer::Layer()
     this->RegisterAttClass(ATT_VISIBILITY);
 
     // owned pointers need to be set to NULL;
-    m_staffDefClef = NULL;
+    m_staffDefClefs.clear();
     m_staffDefKeySig = NULL;
     m_staffDefMensur = NULL;
     m_staffDefMeterSig = NULL;
@@ -94,7 +95,7 @@ void Layer::CloneReset()
     Object::CloneReset();
 
     m_drawKeySigCancellation = false;
-    m_staffDefClef = NULL;
+    m_staffDefClefs.clear();
     m_staffDefKeySig = NULL;
     m_staffDefMensur = NULL;
     m_staffDefMeterSig = NULL;
@@ -114,10 +115,10 @@ void Layer::CloneReset()
 void Layer::ResetStaffDefObjects()
 {
     m_drawKeySigCancellation = false;
-    if (m_staffDefClef) {
-        delete m_staffDefClef;
-        m_staffDefClef = NULL;
+    for (Clef *clef : m_staffDefClefs) {
+        delete clef;
     }
+    m_staffDefClefs.clear();
     if (m_staffDefKeySig) {
         delete m_staffDefKeySig;
         m_staffDefKeySig = NULL;
@@ -159,14 +160,39 @@ void Layer::ResetStaffDefObjects()
 void Layer::ReplaceStaffDefClef(const Clef *clef)
 {
     assert(clef);
-    if (m_staffDefClef) {
-        delete m_staffDefClef;
-        m_staffDefClef = NULL;
+    for (Clef *owned : m_staffDefClefs) {
+        delete owned;
     }
-    m_staffDefClef = new Clef(*clef);
-    m_staffDefClef->SetParent(this);
+    m_staffDefClefs.clear();
+    Clef *copy = new Clef(*clef);
+    copy->SetParent(this);
     // Draw under the MEI id of the promoting layer clef (which is not drawn).
-    m_staffDefClef->SetID(clef->GetID());
+    copy->SetID(clef->GetID());
+    m_staffDefClefs.push_back(copy);
+}
+
+void Layer::ReplaceStaffDefClefGroup(const ClefGrp *clefGrp)
+{
+    assert(clefGrp);
+    this->ClearStaffDefClefs();
+    for (int i = 0; i < clefGrp->GetChildCount(); ++i) {
+        const Object *child = clefGrp->GetChild(i);
+        if (!child || !child->Is(CLEF)) continue;
+        const Clef *clef = vrv_cast<const Clef *>(child);
+        assert(clef);
+        Clef *copy = new Clef(*clef);
+        copy->SetParent(this);
+        copy->SetID(clef->GetID());
+        m_staffDefClefs.push_back(copy);
+    }
+}
+
+void Layer::ClearStaffDefClefs()
+{
+    for (Clef *owned : m_staffDefClefs) {
+        delete owned;
+    }
+    m_staffDefClefs.clear();
 }
 
 bool Layer::IsSupportedChild(ClassId classId)
@@ -581,8 +607,18 @@ void Layer::SetDrawingStaffDefValues(StaffDef *currentStaffDef)
     this->ResetStaffDefObjects();
 
     if (currentStaffDef->DrawClef()) {
-        m_staffDefClef = new Clef(*currentStaffDef->GetCurrentClef());
-        m_staffDefClef->SetParent(this);
+        if (currentStaffDef->HasCurrentClefGroup()) {
+            for (const Clef &member : currentStaffDef->GetCurrentClefGroupMembers()) {
+                Clef *copy = new Clef(member);
+                copy->SetParent(this);
+                m_staffDefClefs.push_back(copy);
+            }
+        }
+        else {
+            Clef *copy = new Clef(*currentStaffDef->GetCurrentClef());
+            copy->SetParent(this);
+            m_staffDefClefs.push_back(copy);
+        }
     }
     if (currentStaffDef->DrawKeySig()) {
         m_staffDefKeySig = new KeySig(*currentStaffDef->GetCurrentKeySig());
@@ -612,7 +648,7 @@ void Layer::SetDrawingStaffDefValues(StaffDef *currentStaffDef)
 bool Layer::GetDrawingStaffDefValues(StaffDef *staffDef) const
 {
     bool hasValue = false;
-    if (this->m_staffDefClef) {
+    if (!this->m_staffDefClefs.empty()) {
         staffDef->SetDrawClef(true);
         hasValue = true;
     }

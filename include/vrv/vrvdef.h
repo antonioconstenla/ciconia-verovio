@@ -262,6 +262,9 @@ enum ClassId : uint16_t {
     TUPLET_BRACKET,
     TUPLET_NUM,
     VERSE,
+    // Appended after existing LayerElement ids so prior ClassId values stay stable
+    // across incremental WASM rebuilds that retain older .o files.
+    CLEFGRP,
     LAYER_ELEMENT_max,
     // Ids for ScoreDefElement child classes
     SCOREDEF_ELEMENT,

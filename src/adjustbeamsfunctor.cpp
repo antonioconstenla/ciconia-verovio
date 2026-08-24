@@ -241,7 +241,7 @@ FunctorCode AdjustBeamsFunctor::VisitLayerElement(LayerElement *layerElement)
     // ignore elements that are both on other layer and cross-staff
     if (m_isOtherLayer && layerElement->m_crossStaff) return FUNCTOR_CONTINUE;
     // ignore specific elements, since they should not be influencing beam positioning
-    if (layerElement->IsAnyOf(std::array{ BTREM, GRACEGRP, SPACE, TUPLET, TUPLET_BRACKET, TUPLET_NUM }))
+    if (layerElement->IsAnyOf(std::array{ BTREM, CLEFGRP, GRACEGRP, SPACE, TUPLET, TUPLET_BRACKET, TUPLET_NUM }))
         return FUNCTOR_CONTINUE;
     // ignore elements that start before the beam
     if (layerElement->GetDrawingX() < m_x1) return FUNCTOR_CONTINUE;

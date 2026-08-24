@@ -70,6 +70,7 @@ class FloatingElement;
 class FTrem;
 class GenericLayerElement;
 class Gliss;
+class ClefGrp;
 class GraceGrp;
 class Graphic;
 class GrpSym;
@@ -406,6 +407,7 @@ private:
     void WriteBTrem(pugi::xml_node currentNode, BTrem *bTrem);
     void WriteChord(pugi::xml_node currentNode, Chord *chord);
     void WriteClef(pugi::xml_node currentNode, Clef *clef);
+    void WriteClefGrp(pugi::xml_node currentNode, ClefGrp *clefGrp);
     void WriteCustos(pugi::xml_node currentNode, Custos *custos);
     void WriteDivLine(pugi::xml_node currentNode, DivLine *divLine);
     void WriteDot(pugi::xml_node currentNode, Dot *dot);
@@ -760,6 +762,7 @@ private:
     bool ReadBTrem(Object *parent, pugi::xml_node bTrem);
     bool ReadChord(Object *parent, pugi::xml_node chord);
     bool ReadClef(Object *parent, pugi::xml_node clef);
+    bool ReadClefGrp(Object *parent, pugi::xml_node clefGrp);
     bool ReadCustos(Object *parent, pugi::xml_node custos);
     bool ReadDivLine(Object *parent, pugi::xml_node divLine);
     bool ReadDot(Object *parent, pugi::xml_node dot);

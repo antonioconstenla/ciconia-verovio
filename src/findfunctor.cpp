@@ -426,10 +426,13 @@ FunctorCode FindElementInLayerStaffDefFunctor::VisitLayer(const Layer *layer)
 {
     if (!layer->HasStaffDef()) return FUNCTOR_SIBLINGS;
     // Get corresponding elements from the layer
-    if (layer->GetStaffDefClef() && (layer->GetStaffDefClef()->GetID() == m_id)) {
-        m_element = layer->GetStaffDefClef();
+    for (const Clef *clef : layer->GetStaffDefClefs()) {
+        if (clef->GetID() == m_id) {
+            m_element = const_cast<Clef *>(clef);
+            return FUNCTOR_CONTINUE;
+        }
     }
-    else if (layer->GetStaffDefKeySig() && (layer->GetStaffDefKeySig()->GetID() == m_id)) {
+    if (layer->GetStaffDefKeySig() && (layer->GetStaffDefKeySig()->GetID() == m_id)) {
         m_element = layer->GetStaffDefKeySig();
     }
     else if (layer->GetStaffDefMensur() && (layer->GetStaffDefMensur()->GetID() == m_id)) {

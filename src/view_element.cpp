@@ -103,6 +103,9 @@ void View::DrawLayerElement(DeviceContext *dc, LayerElement *element, Layer *lay
     else if (element->Is(CLEF)) {
         this->DrawClef(dc, element, layer, staff, measure);
     }
+    else if (element->Is(CLEFGRP)) {
+        this->DrawClefGrp(dc, element, layer, staff, measure);
+    }
     else if (element->Is(CUSTOS)) {
         this->DrawCustos(dc, element, layer, staff, measure);
     }
@@ -744,6 +747,22 @@ void View::DrawClef(DeviceContext *dc, LayerElement *element, Layer *layer, Staf
         Resources &resources = m_doc->GetResourcesForModification();
         resources.SetCurrentFont(previousFont);
     }
+
+    dc->EndGraphic(element, this);
+}
+
+void View::DrawClefGrp(DeviceContext *dc, LayerElement *element, Layer *layer, Staff *staff, Measure *measure)
+{
+    assert(dc);
+    assert(element);
+    assert(layer);
+    assert(staff);
+    assert(measure);
+
+    dc->StartGraphic(element, "", element->GetID());
+
+    // Member clefs draw themselves (or skip when absorbed into staffDef).
+    this->DrawLayerChildren(dc, element, layer, staff, measure);
 
     dc->EndGraphic(element, this);
 }

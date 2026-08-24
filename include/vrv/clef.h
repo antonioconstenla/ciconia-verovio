@@ -68,8 +68,9 @@ public:
 
     /**
      * @name Drawing absorption into the staffDef system-start clef.
-     * When true, this layer clef was promoted to m_staffDefClef for SCOREDEF
-     * alignment/drawing; the layer instance must not align or draw again.
+     * When true, this layer clef was promoted to staffDef system-start
+     * drawing (ReplaceStaffDefClef / ReplaceStaffDefClefGroup); the layer
+     * instance must not align or draw again.
      */
     ///@{
     void SetDrawingAbsorbedIntoStaffDef(bool absorbed) { m_drawingAbsorbedIntoStaffDef = absorbed; }

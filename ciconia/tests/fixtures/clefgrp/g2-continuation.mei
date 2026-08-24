@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mei xmlns="http://www.music-encoding.org/ns/mei" meiversion="5.1">
+  <meiHead><fileDesc><titleStmt><title>6C4C3 g2 group continuation across sb</title></titleStmt><pubStmt/></fileDesc></meiHead>
+  <music><body><mdiv n="1"><score>
+    <scoreDef><staffGrp>
+      <staffDef n="1" lines="5" notationtype="mensural.black"><clef shape="C" line="2"/></staffDef>
+    </staffGrp></scoreDef>
+    <section xml:id="s1"><staff n="1"><layer n="1">
+      <note xml:id="pre" dur="brevis" oct="4" pname="g"/>
+    </layer></staff></section>
+    <sb xml:id="sb1"/>
+    <section xml:id="s2"><staff n="1"><layer n="1">
+      <clefGrp xml:id="grp1">
+        <clef xml:id="c4" shape="C" line="4"/>
+        <clef xml:id="f2" shape="F" line="2"/>
+      </clefGrp>
+      <note xml:id="post-b" dur="brevis" oct="4" pname="e"/>
+    </layer></staff></section>
+    <sb xml:id="sb2"/>
+    <section xml:id="s3"><staff n="1"><layer n="1">
+      <note xml:id="post-c" dur="brevis" oct="4" pname="d"/>
+    </layer></staff></section>
+  </score></mdiv></body></music>
+</mei>
