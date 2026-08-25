@@ -24,6 +24,7 @@
 #include "caesura.h"
 #include "chord.h"
 #include "clef.h"
+#include "clefgrp.h"
 #include "course.h"
 #include "cpmark.h"
 #include "custos.h"
@@ -871,6 +872,16 @@ FunctorCode FunctorInterface::VisitClef(Clef *clef)
 FunctorCode FunctorInterface::VisitClefEnd(Clef *clef)
 {
     return this->VisitLayerElementEnd(clef);
+}
+
+FunctorCode FunctorInterface::VisitClefGrp(ClefGrp *clefGrp)
+{
+    return this->VisitLayerElement(clefGrp);
+}
+
+FunctorCode FunctorInterface::VisitClefGrpEnd(ClefGrp *clefGrp)
+{
+    return this->VisitLayerElementEnd(clefGrp);
 }
 
 FunctorCode FunctorInterface::VisitCustos(Custos *custos)
@@ -2235,6 +2246,16 @@ FunctorCode ConstFunctorInterface::VisitClef(const Clef *clef)
 FunctorCode ConstFunctorInterface::VisitClefEnd(const Clef *clef)
 {
     return this->VisitLayerElementEnd(clef);
+}
+
+FunctorCode ConstFunctorInterface::VisitClefGrp(const ClefGrp *clefGrp)
+{
+    return this->VisitLayerElement(clefGrp);
+}
+
+FunctorCode ConstFunctorInterface::VisitClefGrpEnd(const ClefGrp *clefGrp)
+{
+    return this->VisitLayerElementEnd(clefGrp);
 }
 
 FunctorCode ConstFunctorInterface::VisitCustos(const Custos *custos)

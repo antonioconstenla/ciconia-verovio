@@ -17,11 +17,14 @@
 #include "proport.h"
 #include "vrvdef.h"
 
+#include <vector>
+
 namespace vrv {
 
 class Object;
 class StaffDef;
 class Stem;
+class ClefGrp;
 
 //----------------------------------------------------------------------------
 // DrawingListInterface
@@ -284,6 +287,15 @@ public:
      */
     ///@{
     void SetCurrentClef(const Clef *clef);
+    /**
+     * Atomically set the current clef group from a <clefGrp>.
+     * Copies all child Clefs into m_currentClefGroupMembers (document order)
+     * and sets m_currentClef to the first member as the staff-mapping
+     * representative. Empty group clears group state.
+     */
+    void SetCurrentClefGroup(const ClefGrp *grp);
+    bool HasCurrentClefGroup() const { return !m_currentClefGroupMembers.empty(); }
+    const std::vector<Clef> &GetCurrentClefGroupMembers() const { return m_currentClefGroupMembers; }
     void SetCurrentKeySig(const KeySig *keySig);
     void SetCurrentMensur(const Mensur *mensur);
     void SetCurrentMeterSig(const MeterSig *meterSig);
@@ -335,8 +347,14 @@ public:
     ///@}
 
 private:
-    /** The clef or clef attributes */
+    /** The clef or clef attributes (pitch-mapping representative) */
     Clef m_currentClef;
+    /**
+     * Group members for simultaneous system-start clefs (e.g. C4+F2).
+     * Empty means single-clef state. When non-empty, m_currentClef mirrors
+     * the first member for GetClefLocOffset / staff mapping.
+     */
+    std::vector<Clef> m_currentClefGroupMembers;
     /** The key signature */
     KeySig m_currentKeySig;
     /** The mensur */

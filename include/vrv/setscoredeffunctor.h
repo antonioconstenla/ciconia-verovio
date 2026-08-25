@@ -140,6 +140,7 @@ public:
      */
     ///@{
     FunctorCode VisitClef(Clef *clef) override;
+    FunctorCode VisitClefGrp(ClefGrp *clefGrp) override;
     FunctorCode VisitKeySig(KeySig *keySig) override;
     FunctorCode VisitLayer(Layer *layer) override;
     FunctorCode VisitMeasure(Measure *measure) override;
@@ -365,6 +366,7 @@ public:
      */
     ///@{
     FunctorCode VisitClef(Clef *clef) override;
+    FunctorCode VisitClefGrp(ClefGrp *clefGrp) override;
     FunctorCode VisitLayer(Layer *layer) override;
     FunctorCode VisitMeasure(Measure *measure) override;
     FunctorCode VisitMeasureEnd(Measure *measure) override;

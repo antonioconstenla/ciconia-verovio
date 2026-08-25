@@ -35,6 +35,7 @@
 #include "choice.h"
 #include "chord.h"
 #include "clef.h"
+#include "clefgrp.h"
 #include "comparison.h"
 #include "corr.h"
 #include "course.h"
@@ -696,6 +697,10 @@ bool MEIOutput::WriteObjectInternal(Object *object, bool useCustomScoreDef)
         else if (object->Is(CLEF)) {
             if (this->IsTreeObject(object)) m_currentNode = m_currentNode.append_child("clef");
             this->WriteClef(m_currentNode, vrv_cast<Clef *>(object));
+        }
+        else if (object->Is(CLEFGRP)) {
+            m_currentNode = m_currentNode.append_child("clefGrp");
+            this->WriteClefGrp(m_currentNode, vrv_cast<ClefGrp *>(object));
         }
         else if (object->Is(CUSTOS)) {
             m_currentNode = m_currentNode.append_child("custos");
@@ -2593,6 +2598,13 @@ void MEIOutput::WriteClef(pugi::xml_node currentNode, Clef *clef)
     clef->WriteVisibility(currentNode);
 }
 
+void MEIOutput::WriteClefGrp(pugi::xml_node currentNode, ClefGrp *clefGrp)
+{
+    assert(clefGrp);
+
+    this->WriteLayerElement(currentNode, clefGrp);
+}
+
 void MEIOutput::WriteCustos(pugi::xml_node currentNode, Custos *custos)
 {
     assert(custos);
@@ -3968,6 +3980,15 @@ bool MEIInput::IsAllowed(std::string element, Object *filterParent)
             return true;
         }
         else if (element == "space") {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    // filter for clefGrp
+    else if (filterParent->Is(CLEFGRP)) {
+        if (element == "clef") {
             return true;
         }
         else {
@@ -6680,6 +6701,9 @@ bool MEIInput::ReadLayerChildren(Object *parent, pugi::xml_node parentNode, Obje
         else if (elementName == "clef") {
             success = this->ReadClef(parent, xmlElement);
         }
+        else if (elementName == "clefGrp") {
+            success = this->ReadClefGrp(parent, xmlElement);
+        }
         else if (elementName == "custos") {
             success = this->ReadCustos(parent, xmlElement);
         }
@@ -7009,6 +7033,16 @@ bool MEIInput::ReadClef(Object *parent, pugi::xml_node clef)
     parent->AddChild(vrvClef);
     this->ReadUnsupportedAttr(clef, vrvClef);
     return true;
+}
+
+bool MEIInput::ReadClefGrp(Object *parent, pugi::xml_node clefGrp)
+{
+    ClefGrp *vrvClefGrp = new ClefGrp();
+    this->ReadLayerElement(clefGrp, vrvClefGrp);
+
+    parent->AddChild(vrvClefGrp);
+    this->ReadUnsupportedAttr(clefGrp, vrvClefGrp);
+    return this->ReadLayerChildren(vrvClefGrp, clefGrp, vrvClefGrp);
 }
 
 void MEIInput::ReadAccidAttr(pugi::xml_node node, Object *object)

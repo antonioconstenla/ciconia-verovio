@@ -54,6 +54,7 @@ class FTrem;
 class GenericLayerElement;
 class Gliss;
 class GraceAligner;
+class ClefGrp;
 class GraceGrp;
 class Graphic;
 class GrpSym;
@@ -365,6 +366,8 @@ public:
     virtual FunctorCode VisitChordEnd(Chord *chord);
     virtual FunctorCode VisitClef(Clef *clef);
     virtual FunctorCode VisitClefEnd(Clef *clef);
+    virtual FunctorCode VisitClefGrp(ClefGrp *clefGrp);
+    virtual FunctorCode VisitClefGrpEnd(ClefGrp *clefGrp);
     virtual FunctorCode VisitCustos(Custos *custos);
     virtual FunctorCode VisitCustosEnd(Custos *custos);
     virtual FunctorCode VisitDot(Dot *dot);
@@ -744,6 +747,8 @@ public:
     virtual FunctorCode VisitChordEnd(const Chord *chord);
     virtual FunctorCode VisitClef(const Clef *clef);
     virtual FunctorCode VisitClefEnd(const Clef *clef);
+    virtual FunctorCode VisitClefGrp(const ClefGrp *clefGrp);
+    virtual FunctorCode VisitClefGrpEnd(const ClefGrp *clefGrp);
     virtual FunctorCode VisitCustos(const Custos *custos);
     virtual FunctorCode VisitCustosEnd(const Custos *custos);
     virtual FunctorCode VisitDot(const Dot *dot);

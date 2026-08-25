@@ -60,9 +60,9 @@ FunctorCode CalcBBoxOverflowsFunctor::VisitObject(Object *object)
         Layer *currentLayer = vrv_cast<Layer *>(object);
         assert(currentLayer);
         // set scoreDef attr
-        if (currentLayer->GetStaffDefClef()) {
+        for (Clef *clef : currentLayer->GetStaffDefClefs()) {
             // System scoreDef clefs are taken into account but treated separately (see below)
-            this->VisitClef(currentLayer->GetStaffDefClef());
+            this->VisitClef(clef);
         }
         if (currentLayer->GetStaffDefKeySig()) {
             this->VisitKeySig(currentLayer->GetStaffDefKeySig());

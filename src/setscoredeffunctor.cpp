@@ -9,6 +9,8 @@
 
 //----------------------------------------------------------------------------
 
+#include "clef.h"
+#include "clefgrp.h"
 #include "doc.h"
 #include "layer.h"
 #include "ossia.h"
@@ -131,6 +133,11 @@ FunctorCode ScoreDefSetCurrentFunctor::VisitClef(Clef *clef)
     if (clef->IsScoreDefElement()) {
         return FUNCTOR_CONTINUE;
     }
+    // Group members: VisitClefGrp owns SetCurrentClefGroup and promotion/absorption.
+    // Do not clear absorbed here — VisitClefGrp sets it when promoting the whole group.
+    if (clef->GetParent() && clef->GetParent()->Is(CLEFGRP)) {
+        return FUNCTOR_CONTINUE;
+    }
     // Cleared each ScoreDef pass; set again below when promoting.
     clef->SetDrawingAbsorbedIntoStaffDef(false);
     assert(m_currentStaffDef);
@@ -161,6 +168,59 @@ FunctorCode ScoreDefSetCurrentFunctor::VisitClef(Clef *clef)
                 if (firstLayer == layer) {
                     layer->ReplaceStaffDefClef(clef);
                     clef->SetDrawingAbsorbedIntoStaffDef(true);
+                }
+            }
+        }
+    }
+    return FUNCTOR_CONTINUE;
+}
+
+FunctorCode ScoreDefSetCurrentFunctor::VisitClefGrp(ClefGrp *clefGrp)
+{
+    if (clefGrp->IsScoreDefElement()) {
+        return FUNCTOR_CONTINUE;
+    }
+    assert(m_currentStaffDef);
+
+    // Staff N from first child clef (cross-staff) or current staffDef.
+    int n = m_currentStaffDef->GetN();
+    for (int i = 0; i < clefGrp->GetChildCount(); ++i) {
+        Object *child = clefGrp->GetChild(i);
+        if (!child || !child->Is(CLEF)) continue;
+        Clef *clef = vrv_cast<Clef *>(child);
+        assert(clef);
+        if (clef->m_crossStaff) {
+            n = clef->m_crossStaff->GetN();
+        }
+        break;
+    }
+
+    StaffDef *upcomingStaffDef = m_upcomingScoreDef.GetStaffDef(n);
+    assert(upcomingStaffDef);
+    // Atomic GROUP update — do not SetCurrentClef per member via VisitClef.
+    upcomingStaffDef->SetCurrentClefGroup(clefGrp);
+    m_upcomingScoreDef.m_setAsDrawing = true;
+
+    // Leading system-start clefGrp: drop the obsolete staffDef continuation
+    // clef (e.g. prior single C2) so it is not drawn beside the group. Members
+    // stay layer-drawn via DrawClefGrp and share ALIGNMENT_SCOREDEF_CLEF (same
+    // system-start X) — same stacking path as a mid-system clefGrp.
+    // Do NOT absorb members into staffDef sidecars here: that path left empty
+    // systems when sidecars were cleared by a later layout pass.
+    if (m_isSystemBreakMeasure && clefGrp->GetParent() && clefGrp->GetParent()->Is(LAYER)) {
+        Layer *layer = vrv_cast<Layer *>(clefGrp->GetParent());
+        assert(layer);
+        if (layer->GetChildCount() > 0) {
+            Object *firstChild = layer->GetChild(0);
+            LayerElement *firstElement = NULL;
+            if (firstChild && firstChild->IsLayerElement()) {
+                firstElement = vrv_cast<LayerElement *>(firstChild)->ThisOrSameasLink();
+            }
+            if (firstElement && (firstElement == clefGrp)) {
+                Staff *staff = vrv_cast<Staff *>(layer->GetFirstAncestor(STAFF));
+                Layer *firstLayer = staff ? vrv_cast<Layer *>(staff->FindDescendantByType(LAYER)) : NULL;
+                if (firstLayer == layer) {
+                    layer->ClearStaffDefClefs();
                 }
             }
         }
@@ -687,9 +747,21 @@ FunctorCode ScoreDefSetOssiaFunctor::VisitClef(Clef *clef)
     if (clef->IsScoreDefElement()) {
         return FUNCTOR_CONTINUE;
     }
+    if (clef->GetParent() && clef->GetParent()->Is(CLEFGRP)) {
+        return FUNCTOR_CONTINUE;
+    }
     // Set the clef to the upcoming ossia - stored in VisitStaffEnd
     m_upcomingStaffDef.SetCurrentClef(clef);
 
+    return FUNCTOR_CONTINUE;
+}
+
+FunctorCode ScoreDefSetOssiaFunctor::VisitClefGrp(ClefGrp *clefGrp)
+{
+    if (clefGrp->IsScoreDefElement()) {
+        return FUNCTOR_CONTINUE;
+    }
+    m_upcomingStaffDef.SetCurrentClefGroup(clefGrp);
     return FUNCTOR_CONTINUE;
 }
 

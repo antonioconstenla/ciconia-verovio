@@ -14,6 +14,7 @@
 //----------------------------------------------------------------------------
 
 #include "chord.h"
+#include "clefgrp.h"
 #include "layerelement.h"
 #include "note.h"
 #include "object.h"
@@ -594,6 +595,7 @@ StaffDefDrawingInterface::~StaffDefDrawingInterface()
 void StaffDefDrawingInterface::Reset()
 {
     m_currentClef.Reset();
+    m_currentClefGroupMembers.clear();
     m_currentKeySig.Reset();
     m_currentMensur.Reset();
     m_currentMeterSig.Reset();
@@ -618,8 +620,31 @@ void StaffDefDrawingInterface::ResetOssiaStaffDefs()
 
 void StaffDefDrawingInterface::SetCurrentClef(const Clef *clef)
 {
+    // SINGLE state: clear any prior group members.
+    m_currentClefGroupMembers.clear();
     if (clef) {
         m_currentClef = *clef;
+        m_currentClef.CloneReset();
+    }
+}
+
+void StaffDefDrawingInterface::SetCurrentClefGroup(const ClefGrp *grp)
+{
+    m_currentClefGroupMembers.clear();
+    if (!grp) return;
+
+    // Document-order child clefs; first is the staff-mapping representative.
+    for (int i = 0; i < grp->GetChildCount(); ++i) {
+        const Object *child = grp->GetChild(i);
+        if (!child || !child->Is(CLEF)) continue;
+        const Clef *clef = vrv_cast<const Clef *>(child);
+        assert(clef);
+        m_currentClefGroupMembers.push_back(*clef);
+        m_currentClefGroupMembers.back().CloneReset();
+    }
+
+    if (!m_currentClefGroupMembers.empty()) {
+        m_currentClef = m_currentClefGroupMembers.front();
         m_currentClef.CloneReset();
     }
 }

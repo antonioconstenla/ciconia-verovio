@@ -76,9 +76,11 @@ FunctorCode AlignHorizontallyFunctor::VisitLayer(Layer *layer)
         m_scoreDefRole = SCOREDEF_OSSIA;
     }
 
-    if (layer->GetStaffDefClef()) {
-        if (layer->GetStaffDefClef()->GetVisible() != BOOLEAN_false) {
-            this->VisitClef(layer->GetStaffDefClef());
+    if (layer->GetStaffDefClefs().size() > 0) {
+        for (Clef *clef : layer->GetStaffDefClefs()) {
+            if (clef->GetVisible() != BOOLEAN_false) {
+                this->VisitClef(clef);
+            }
         }
     }
     if (layer->GetStaffDefKeySig()) {
@@ -208,19 +210,33 @@ FunctorCode AlignHorizontallyFunctor::VisitLayerElement(LayerElement *layerEleme
         m_time = m_time + duration;
         return FUNCTOR_CONTINUE;
     }
+    else if (layerElement->Is(CLEFGRP)) {
+        // Container only; member clefs align individually (or via staffDef sidecars).
+        return FUNCTOR_CONTINUE;
+    }
     else if (layerElement->Is(BARLINE)) {
         type = ALIGNMENT_BARLINE;
     }
     else if (layerElement->Is(CLEF)) {
-        if ((layerElement->GetScoreDefRole() == SCOREDEF_SYSTEM)
-            || (layerElement->GetScoreDefRole() == SCOREDEF_INTERMEDIATE))
-            type = ALIGNMENT_SCOREDEF_CLEF;
-        else if (layerElement->GetScoreDefRole() == SCOREDEF_CAUTIONARY)
-            type = ALIGNMENT_SCOREDEF_CAUTION_CLEF;
-        else if (layerElement->GetScoreDefRole() == SCOREDEF_OSSIA)
-            type = ALIGNMENT_SCOREDEF_OSSIA_CLEF;
-        else {
-            type = ALIGNMENT_CLEF;
+        // Leading system-start clefGrp members: same SCOREDEF_CLEF slot (shared X).
+        Object *clefParent = layerElement->GetParent();
+        if (clefParent && clefParent->Is(CLEFGRP) && m_isFirstMeasure) {
+            Object *layerParent = clefParent->GetParent();
+            if (layerParent && layerParent->Is(LAYER) && (layerParent->GetChild(0) == clefParent)) {
+                type = ALIGNMENT_SCOREDEF_CLEF;
+            }
+        }
+        if (type == ALIGNMENT_DEFAULT) {
+            if ((layerElement->GetScoreDefRole() == SCOREDEF_SYSTEM)
+                || (layerElement->GetScoreDefRole() == SCOREDEF_INTERMEDIATE))
+                type = ALIGNMENT_SCOREDEF_CLEF;
+            else if (layerElement->GetScoreDefRole() == SCOREDEF_CAUTIONARY)
+                type = ALIGNMENT_SCOREDEF_CAUTION_CLEF;
+            else if (layerElement->GetScoreDefRole() == SCOREDEF_OSSIA)
+                type = ALIGNMENT_SCOREDEF_OSSIA_CLEF;
+            else {
+                type = ALIGNMENT_CLEF;
+            }
         }
     }
     else if (layerElement->Is(KEYSIG)) {

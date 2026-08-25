@@ -12,9 +12,12 @@
 #include "drawinginterface.h"
 #include "object.h"
 
+#include <vector>
+
 namespace vrv {
 
 class Clef;
+class ClefGrp;
 class DeviceContext;
 class LayerElement;
 class Measure;
@@ -181,8 +184,29 @@ public:
      * Replace the drawing staffDef clef sidecar with a copy of an explicit
      * layer clef (system-start promotion). Leaves keysig/mensur/etc.
      * The sidecar owns the copy and is drawn via DrawStaffDef.
+     * Clears any prior clef group members (SINGLE state).
      */
     void ReplaceStaffDefClef(const Clef *clef);
+
+    /**
+     * Replace staffDef system-start clefs with owned copies of every
+     * <clefGrp> member. All share ALIGNMENT_SCOREDEF_CLEF (same X).
+     */
+    void ReplaceStaffDefClefGroup(const ClefGrp *clefGrp);
+
+    /**
+     * Delete staffDef clef sidecars only (keysig/mensur/etc. unchanged).
+     * Used when an explicit leading <clefGrp> owns system-start drawing.
+     */
+    void ClearStaffDefClefs();
+
+    /**
+     * All staffDef system-start clef sidecars (single or group).
+     */
+    ///@{
+    const std::vector<Clef *> &GetStaffDefClefs() { return m_staffDefClefs; }
+    const std::vector<Clef *> &GetStaffDefClefs() const { return m_staffDefClefs; }
+    ///@}
 
     /**
      * Set drawing clef, keysig, mensur, metersig, metersiggrp if necessary and if available.
@@ -194,8 +218,8 @@ public:
     bool DrawKeySigCancellation() const { return m_drawKeySigCancellation; }
     void SetDrawKeySigCancellation(bool drawKeySigCancellation) { m_drawKeySigCancellation = drawKeySigCancellation; }
 
-    Clef *GetStaffDefClef() { return m_staffDefClef; }
-    const Clef *GetStaffDefClef() const { return m_staffDefClef; }
+    Clef *GetStaffDefClef() { return m_staffDefClefs.empty() ? NULL : m_staffDefClefs.front(); }
+    const Clef *GetStaffDefClef() const { return m_staffDefClefs.empty() ? NULL : m_staffDefClefs.front(); }
     KeySig *GetStaffDefKeySig() { return m_staffDefKeySig; }
     const KeySig *GetStaffDefKeySig() const { return m_staffDefKeySig; }
     Mensur *GetStaffDefMensur() { return m_staffDefMensur; }
@@ -207,7 +231,8 @@ public:
 
     bool HasStaffDef() const
     {
-        return (m_staffDefClef || m_staffDefKeySig || m_staffDefMensur || m_staffDefMeterSig || m_staffDefMeterSigGrp);
+        return (!m_staffDefClefs.empty() || m_staffDefKeySig || m_staffDefMensur || m_staffDefMeterSig
+            || m_staffDefMeterSigGrp);
     }
 
     bool DrawOssiaStaffDef() const { return m_drawOssiaStaffDef; }
@@ -279,8 +304,8 @@ private:
     bool m_crossStaffFromBelow;
     bool m_crossStaffFromAbove;
 
-    /** */
-    Clef *m_staffDefClef;
+    /** StaffDef system-start clef sidecars (one = single; N = clefGrp members) */
+    std::vector<Clef *> m_staffDefClefs;
     KeySig *m_staffDefKeySig;
     Mensur *m_staffDefMensur;
     MeterSig *m_staffDefMeterSig;

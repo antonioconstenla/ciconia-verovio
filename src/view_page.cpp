@@ -1475,8 +1475,10 @@ void View::DrawStaffDef(DeviceContext *dc, Staff *staff, Measure *measure)
     // dc->StartGraphic(&staffDef, "", staffDef.GetID());
 
     // draw the scoreDef if required
-    if (layer->GetStaffDefClef()) {
-        this->DrawLayerElement(dc, layer->GetStaffDefClef(), layer, staff, measure);
+    if (!layer->GetStaffDefClefs().empty()) {
+        for (Clef *clef : layer->GetStaffDefClefs()) {
+            this->DrawLayerElement(dc, clef, layer, staff, measure);
+        }
     }
     if (layer->GetStaffDefKeySig()) {
         this->DrawLayerElement(dc, layer->GetStaffDefKeySig(), layer, staff, measure);
