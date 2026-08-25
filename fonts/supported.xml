@@ -2445,7 +2445,7 @@
         <!--<glyph glyph-code="EA07" smufl-name="chantCustosStemDownPosMiddle" />-->
         <!--<glyph glyph-code="EA08" smufl-name="chantCustosStemDownPosHigh" />-->
         <!--<glyph glyph-code="EA09" smufl-name="chantCustosStemDownPosHighest" />-->
-        <!--<glyph glyph-code="EA0A" smufl-name="mensuralCustosCheckmark" />-->
+        <glyph glyph-code="EA0A" smufl-name="mensuralCustosCheckmark" />
         <!--<glyph glyph-code="EA0B" smufl-name="mensuralCustosTurn" />-->
         <!--<glyph glyph-code="EA0C" smufl-name="mensuralColorationStartSquare" />-->
         <!--<glyph glyph-code="EA0D" smufl-name="mensuralColorationEndSquare" />-->
