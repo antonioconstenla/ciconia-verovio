@@ -9,8 +9,8 @@
 
 //----------------------------------------------------------------------------
 
-#include "doc.h"
 #include "clef.h"
+#include "doc.h"
 #include "staff.h"
 #include "vrv.h"
 

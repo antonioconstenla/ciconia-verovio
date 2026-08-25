@@ -9,9 +9,9 @@
 
 //----------------------------------------------------------------------------
 
-#include "doc.h"
 #include "clef.h"
 #include "clefgrp.h"
+#include "doc.h"
 #include "layer.h"
 #include "ossia.h"
 #include "page.h"
@@ -164,8 +164,7 @@ FunctorCode ScoreDefSetCurrentFunctor::VisitClef(Clef *clef)
                 // DrawStaffDef reads only the first layer of the staff; promote
                 // only there so a later-layer leading clef stays inline.
                 Staff *staff = vrv_cast<Staff *>(layer->GetFirstAncestor(STAFF));
-                Layer *firstLayer
-                    = staff ? vrv_cast<Layer *>(staff->FindDescendantByType(LAYER)) : NULL;
+                Layer *firstLayer = staff ? vrv_cast<Layer *>(staff->FindDescendantByType(LAYER)) : NULL;
                 if (firstLayer == layer) {
                     layer->ReplaceStaffDefClef(clef);
                     clef->SetDrawingAbsorbedIntoStaffDef(true);
@@ -219,8 +218,7 @@ FunctorCode ScoreDefSetCurrentFunctor::VisitClefGrp(ClefGrp *clefGrp)
             }
             if (firstElement && (firstElement == clefGrp)) {
                 Staff *staff = vrv_cast<Staff *>(layer->GetFirstAncestor(STAFF));
-                Layer *firstLayer
-                    = staff ? vrv_cast<Layer *>(staff->FindDescendantByType(LAYER)) : NULL;
+                Layer *firstLayer = staff ? vrv_cast<Layer *>(staff->FindDescendantByType(LAYER)) : NULL;
                 if (firstLayer == layer) {
                     layer->ClearStaffDefClefs();
                 }

@@ -9,11 +9,11 @@
 
 //----------------------------------------------------------------------------
 
+#include "clef.h"
 #include "div.h"
 #include "doc.h"
 #include "dot.h"
 #include "fig.h"
-#include "clef.h"
 #include "layer.h"
 #include "ligature.h"
 #include "nc.h"
