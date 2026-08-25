@@ -67,6 +67,16 @@ public:
     bool IsScoreDefElement() const override { return (this->GetParent() && this->GetFirstAncestor(SCOREDEF)); }
 
     /**
+     * @name Drawing absorption into the staffDef system-start clef.
+     * When true, this layer clef was promoted to m_staffDefClef for SCOREDEF
+     * alignment/drawing; the layer instance must not align or draw again.
+     */
+    ///@{
+    void SetDrawingAbsorbedIntoStaffDef(bool absorbed) { m_drawingAbsorbedIntoStaffDef = absorbed; }
+    bool IsDrawingAbsorbedIntoStaffDef() const { return m_drawingAbsorbedIntoStaffDef; }
+    ///@}
+
+    /**
      * Return the offset of the clef
      */
     int GetClefLocOffset() const;
@@ -99,7 +109,11 @@ private:
 public:
     //
 private:
-    //
+    /**
+     * True when this layer clef is drawn via the staffDef system-start sidecar
+     * instead of as an ordinary inline ALIGNMENT_CLEF.
+     */
+    bool m_drawingAbsorbedIntoStaffDef;
 };
 
 } // namespace vrv

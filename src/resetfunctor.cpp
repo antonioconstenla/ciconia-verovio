@@ -11,6 +11,7 @@
 
 #include "arpeg.h"
 #include "beamspan.h"
+#include "clef.h"
 #include "custos.h"
 #include "div.h"
 #include "dot.h"
@@ -129,6 +130,15 @@ FunctorCode ResetDataFunctor::VisitChord(Chord *chord)
 
     // We want the list of the ObjectListInterface to be regenerated
     chord->Modify();
+    return FUNCTOR_CONTINUE;
+}
+
+FunctorCode ResetDataFunctor::VisitClef(Clef *clef)
+{
+    this->VisitLayerElement(clef);
+    // Transient layout flag: must not survive CloneReset / RedoLayout.
+    clef->SetDrawingAbsorbedIntoStaffDef(false);
+
     return FUNCTOR_CONTINUE;
 }
 

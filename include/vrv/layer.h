@@ -178,6 +178,13 @@ public:
     void ResetStaffDefObjects();
 
     /**
+     * Replace the drawing staffDef clef sidecar with a copy of an explicit
+     * layer clef (system-start promotion). Leaves keysig/mensur/etc.
+     * The sidecar owns the copy and is drawn via DrawStaffDef.
+     */
+    void ReplaceStaffDefClef(const Clef *clef);
+
+    /**
      * Set drawing clef, keysig, mensur, metersig, metersiggrp if necessary and if available.
      */
     ///@{

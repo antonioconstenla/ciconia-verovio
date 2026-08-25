@@ -78,6 +78,7 @@ void Clef::Reset()
     this->ResetOctave();
     this->ResetOctaveDisplacement();
     this->ResetStaffIdent();
+    m_drawingAbsorbedIntoStaffDef = false;
     this->ResetTypography();
     this->ResetVisibility();
 }

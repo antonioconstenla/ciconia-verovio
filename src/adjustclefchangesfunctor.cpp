@@ -9,6 +9,7 @@
 
 //----------------------------------------------------------------------------
 
+#include "clef.h"
 #include "doc.h"
 #include "staff.h"
 #include "vrv.h"
@@ -29,6 +30,9 @@ AdjustClefChangesFunctor::AdjustClefChangesFunctor(Doc *doc) : DocFunctor(doc)
 FunctorCode AdjustClefChangesFunctor::VisitClef(Clef *clef)
 {
     if (clef->IsScoreDefElement()) return FUNCTOR_SIBLINGS;
+
+    // Promoted into staffDef system-start drawing; no layer ALIGNMENT_CLEF.
+    if (clef->IsDrawingAbsorbedIntoStaffDef()) return FUNCTOR_CONTINUE;
 
     assert(clef->GetAlignment());
     if (clef->GetAlignment()->GetType() != ALIGNMENT_CLEF) return FUNCTOR_CONTINUE;

@@ -181,6 +181,8 @@ private:
     bool m_restart;
     // Flag indicating if we already have a measure in the system
     bool m_hasMeasure;
+    // Flag indicating the current measure is the first after a system break
+    bool m_isSystemBreakMeasure;
     // Map of ossia above a given staffN
     MapOfOssiaStaffNs m_ossiasAbove;
     // Map of ossia below a given staffN

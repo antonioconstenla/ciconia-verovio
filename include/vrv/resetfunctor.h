@@ -44,6 +44,7 @@ public:
     FunctorCode VisitBeam(Beam *beam) override;
     FunctorCode VisitBeamSpan(BeamSpan *beamSpan) override;
     FunctorCode VisitChord(Chord *chord) override;
+    FunctorCode VisitClef(Clef *clef) override;
     FunctorCode VisitControlElement(ControlElement *controlElement) override;
     FunctorCode VisitCustos(Custos *custos) override;
     FunctorCode VisitDiv(Div *div) override;

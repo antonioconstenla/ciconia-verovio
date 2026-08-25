@@ -156,6 +156,19 @@ void Layer::ResetStaffDefObjects()
     m_drawOssiaStaffDef = false;
 }
 
+void Layer::ReplaceStaffDefClef(const Clef *clef)
+{
+    assert(clef);
+    if (m_staffDefClef) {
+        delete m_staffDefClef;
+        m_staffDefClef = NULL;
+    }
+    m_staffDefClef = new Clef(*clef);
+    m_staffDefClef->SetParent(this);
+    // Draw under the MEI id of the promoting layer clef (which is not drawn).
+    m_staffDefClef->SetID(clef->GetID());
+}
+
 bool Layer::IsSupportedChild(ClassId classId)
 {
     if (Object::IsLayerElement(classId)) {

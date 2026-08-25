@@ -119,6 +119,7 @@ ScoreDefSetCurrentFunctor::ScoreDefSetCurrentFunctor(Doc *doc) : DocFunctor(doc)
     m_drawLabels = false;
     m_restart = false;
     m_hasMeasure = false;
+    m_isSystemBreakMeasure = false;
     m_hasOssia = false;
 }
 
@@ -130,12 +131,40 @@ FunctorCode ScoreDefSetCurrentFunctor::VisitClef(Clef *clef)
     if (clef->IsScoreDefElement()) {
         return FUNCTOR_CONTINUE;
     }
+    // Cleared each ScoreDef pass; set again below when promoting.
+    clef->SetDrawingAbsorbedIntoStaffDef(false);
     assert(m_currentStaffDef);
     const int n = clef->m_crossStaff ? clef->m_crossStaff->GetN() : m_currentStaffDef->GetN();
     StaffDef *upcomingStaffDef = m_upcomingScoreDef.GetStaffDef(n);
     assert(upcomingStaffDef);
     upcomingStaffDef->SetCurrentClef(clef);
     m_upcomingScoreDef.m_setAsDrawing = true;
+
+    // When an explicit clef is the first effective layer object at a new system,
+    // replace the obsolete staffDef continuation clef with the NEW explicit clef
+    // so DrawStaffDef / ALIGNMENT_SCOREDEF_CLEF place it at the system-start
+    // inset. Absorb the layer instance so it is not aligned/drawn again.
+    if (m_isSystemBreakMeasure && clef->GetParent() && clef->GetParent()->Is(LAYER)) {
+        Layer *layer = vrv_cast<Layer *>(clef->GetParent());
+        assert(layer);
+        if (layer->GetChildCount() > 0) {
+            Object *firstChild = layer->GetChild(0);
+            LayerElement *firstElement = NULL;
+            if (firstChild && firstChild->IsLayerElement()) {
+                firstElement = vrv_cast<LayerElement *>(firstChild)->ThisOrSameasLink();
+            }
+            if (firstElement && (firstElement == clef)) {
+                // DrawStaffDef reads only the first layer of the staff; promote
+                // only there so a later-layer leading clef stays inline.
+                Staff *staff = vrv_cast<Staff *>(layer->GetFirstAncestor(STAFF));
+                Layer *firstLayer = staff ? vrv_cast<Layer *>(staff->FindDescendantByType(LAYER)) : NULL;
+                if (firstLayer == layer) {
+                    layer->ReplaceStaffDefClef(clef);
+                    clef->SetDrawingAbsorbedIntoStaffDef(true);
+                }
+            }
+        }
+    }
     return FUNCTOR_CONTINUE;
 }
 
@@ -168,6 +197,7 @@ FunctorCode ScoreDefSetCurrentFunctor::VisitMeasure(Measure *measure)
     int drawingFlags = 0;
     // This is the first measure of the system - more to do...
     if (m_currentSystem) {
+        m_isSystemBreakMeasure = true;
         drawingFlags |= Measure::BarlineDrawingFlags::SYSTEM_BREAK;
         // We had a scoreDef so we need to put cautionary values
         // This will also happen with clef in the last measure - however, the cautionary functor will not do
@@ -185,6 +215,9 @@ FunctorCode ScoreDefSetCurrentFunctor::VisitMeasure(Measure *measure)
         m_currentSystem->GetDrawingScoreDef()->SetDrawLabels(m_drawLabels);
         m_currentSystem = NULL;
         m_drawLabels = false;
+    }
+    else {
+        m_isSystemBreakMeasure = false;
     }
     if (m_upcomingScoreDef.m_setAsDrawing) {
         measure->SetDrawingScoreDef(&m_upcomingScoreDef);
