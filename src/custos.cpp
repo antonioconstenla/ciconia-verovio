@@ -87,7 +87,14 @@ char32_t Custos::GetCustosGlyph(const data_NOTATIONTYPE notationtype) const
     }
 
     if (IsNeumeType(notationtype)) return SMUFL_EA06_chantCustosStemUpPosMiddle; // chantCustosStemUpPosMiddle
-    return SMUFL_EA02_mensuralCustosUp; // mensuralCustosUp
+
+    // Mensural default: checkmark when the selected Resources can resolve it.
+    if (IsMensuralType(notationtype)) {
+        const char32_t code = SMUFL_EA0A_mensuralCustosCheckmark;
+        if (NULL != resources->GetGlyph(code)) return code;
+    }
+
+    return SMUFL_EA02_mensuralCustosUp; // mensuralCustosUp (also non-mensural default)
 }
 
 //----------------------------------------------------------------------------
